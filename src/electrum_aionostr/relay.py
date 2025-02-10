@@ -36,7 +36,7 @@ class Relay:
     async def connect(self, taskgroup, retries=2):
         for i in range(retries):
             try:
-                self.ws = await asyncio.wait_for(connect(self.url, origin=self.origin, ssl=self.ssl_context), self.connect_timeout)
+                self.ws = await asyncio.wait_for(connect(self.url, origin=self.origin), self.connect_timeout)
             except Exception as e:
                 self.log.debug(f"connect error: {e} for {self.url}")
                 await asyncio.sleep(0.2 * i)
