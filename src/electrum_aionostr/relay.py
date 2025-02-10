@@ -19,7 +19,7 @@ class Relay:
     """
     Interact with a relay
     """
-    def __init__(self, url, verbose=False, origin:str = '', private_key:str='', connect_timeout: float=1.0, log=None, ssl_context=None):
+    def __init__(self, url, verbose=False, origin:str = '', private_key:str='', connect_timeout: float=25.0, log=None, ssl_context=None):
         self.log = log or logging.getLogger(__name__)
         self.url = url
         self.ws = None
@@ -193,7 +193,7 @@ class Manager:
         """ returns when all tasks completed. timeout is enforced """
         results = []
         for relay in self.relays:
-            coro = asyncio.wait_for(getattr(relay, func)(*args, **kwargs), timeout=5)
+            coro = asyncio.wait_for(getattr(relay, func)(*args, **kwargs), timeout=25)
             results.append(await self.taskgroup.spawn(coro))
 
         self.log.debug("Waiting for %s", func)
