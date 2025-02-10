@@ -37,7 +37,8 @@ class Relay:
         for i in range(retries):
             try:
                 self.ws = await asyncio.wait_for(connect(self.url, origin=self.origin, ssl=self.ssl_context), self.connect_timeout)
-            except:
+            except Exception as e:
+                self.log.debug(f"connect error: {e} for {self.url}")
                 await asyncio.sleep(0.2 * i)
             else:
                 break
@@ -196,7 +197,7 @@ class Manager:
             coro = asyncio.wait_for(getattr(relay, func)(*args, **kwargs), timeout=25)
             results.append(await self.taskgroup.spawn(coro))
 
-        self.log.debug(f"AIONOSTR UPDATE")
+        self.log.debug(f"AIONOSTR UPDATE2")
         self.log.debug("Waiting for %s", func)
         return await asyncio.wait(results, return_when=asyncio.ALL_COMPLETED)
 
