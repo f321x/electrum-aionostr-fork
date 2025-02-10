@@ -196,6 +196,7 @@ class Manager:
             coro = asyncio.wait_for(getattr(relay, func)(*args, **kwargs), timeout=25)
             results.append(await self.taskgroup.spawn(coro))
 
+        self.log.debug(f"AIONOSTR UPDATE")
         self.log.debug("Waiting for %s", func)
         return await asyncio.wait(results, return_when=asyncio.ALL_COMPLETED)
 
