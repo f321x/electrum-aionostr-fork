@@ -42,7 +42,7 @@ NOSTR_KEY=`aionostr gen | head -1`
 
 Release checklist:
 - bump `__version__` in `__init__.py`
-- write changelog?
+- write changelog in `docs/history.rst`
 - `$ git tag -s $VERSION -m "$VERSION"`
 - build sdist (see [`contrib/sdist/`](contrib/sdist)):
   - `$ ELECBUILD_COMMIT=HEAD ELECBUILD_NOCACHE=1 ./contrib/sdist/build.sh`
