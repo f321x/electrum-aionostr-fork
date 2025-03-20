@@ -17,7 +17,7 @@ unittests_task:
         - env:
             ELECTRUM_PYTHON_VERSION: 3.13
   install_script:
-    - pip install ".[tests]"
+    - pip install ".[tests,crypto]"
   version_script:
     - python3 --version
   script:
