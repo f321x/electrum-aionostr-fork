@@ -5,10 +5,15 @@ import secrets
 import base64
 from hashlib import sha256
 
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import padding
 import electrum_ecc as ecc
+
+# TODO abstract-away crypto backend, as done in electrum/crypto.py
+try:
+    from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+    from cryptography.hazmat.backends import default_backend
+    from cryptography.hazmat.primitives import padding
+except ImportError:
+    raise ImportError("Missing dependency 'cryptography'. You could install it using the [crypto] extra.") from None
 
 from .delegation import Delegation
 from .event import Event

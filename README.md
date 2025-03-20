@@ -17,6 +17,13 @@ Language: Python (>= 3.10)
 This is a fork of [aionostr](https://github.com/davestgermain/aionostr) that does not require Coincurve.
 
 
+## Getting started
+
+```
+$ python3 -m pip install --user ".[crypto]"
+```
+
+
 ## Features
 
 * Retrieve anything from the nostr network, using one command:
