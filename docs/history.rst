@@ -2,7 +2,13 @@
 Release History
 =====
 
-* **Release v0.0.8 (2025-03)**
+* **Release v0.0.9 (2025-03-20)**
+
+  - Declare 'cryptography' dependency in optional extra ``[crypto]``
+
+    - For now, it is still always required. This change simplifies dependency management downstream for Electrum.
+
+* **Release v0.0.8 (2025-03-19)**
 
   - Use correct public key type in ``verify()`` method
   - Always verify signatures of queried events (**Previous versions don't automatically verify signatures!**)
