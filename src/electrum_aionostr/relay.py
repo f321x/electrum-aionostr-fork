@@ -1,19 +1,22 @@
 import asyncio
 import secrets
-import time
 import sys
 import logging
-from json import dumps, loads
+from json import dumps
 from collections import defaultdict, namedtuple
-from typing import Optional, Iterable, Dict, List, Set, Coroutine, Any
+from typing import Optional, Iterable, Dict, List, Set, Any, TYPE_CHECKING
 from dataclasses import dataclass
 from .util import normalize_url
 
 from aiohttp import ClientSession, client_exceptions
-from aiohttp_socks import ProxyConnector
 import aiorpcx
 
 from .event import Event
+
+if TYPE_CHECKING:
+    from logging import Logger
+    from ssl import SSLContext
+    from aiohttp_socks import ProxyConnector
 
 # Subscription used inside Relay
 Subscription = namedtuple('Subscription', ['filters','queue'])
@@ -31,7 +34,7 @@ class Relay:
     Interact with a relay
     """
     def __init__(self, url: str, origin:str = '', private_key:str='', connect_timeout: float=1.0, log=None, ssl_context=None,
-                 proxy: Optional[ProxyConnector]=None):
+                 proxy: Optional['ProxyConnector']=None):
         self.log = log or logging.getLogger(__name__)
         self.url = normalize_url(url)
         self.proxy = proxy
@@ -49,7 +52,8 @@ class Relay:
 
     async def connect(self, taskgroup = None, retries=2):
         if not self.client:
-            self.client = ClientSession(connector=self.proxy)
+            connector_owner = False if self.proxy is not None else True
+            self.client = ClientSession(connector=self.proxy, connector_owner=connector_owner)
         for i in range(retries):
             try:
                 self.ws = await asyncio.wait_for(
@@ -119,7 +123,7 @@ class Relay:
                 elif message[0] == 'AUTH':
                     await self.authenticate(message[1])
                 else:
-                    sys.stderr.write(message)
+                    self.log.debug(f"Unknown message from relay {self.url}: {str(message)}")
             except asyncio.CancelledError:
                 return
             except client_exceptions.WSMessageTypeError:  #  raised by receive_json when connection is closed
@@ -191,13 +195,13 @@ class Manager:
     Manage a collection of relays
     """
     def __init__(self,
-                 relays=None,
-                 origin='aionostr',
-                 private_key=None,
-                 log=None,
-                 ssl_context=None,
-                 proxy: Optional[ProxyConnector]=None,
-                 connect_timeout: Optional[int]=None):
+                 relays: Optional[Iterable[str]] = None,
+                 origin: Optional[str] = 'aionostr',
+                 private_key: Optional[str] = None,
+                 log: Optional['Logger'] = None,
+                 ssl_context: Optional['SSLContext'] = None,
+                 proxy: Optional['ProxyConnector'] = None,
+                 connect_timeout: Optional[int] = None):
         self.log = log or logging.getLogger(__name__)
         self._proxy = proxy
         self._connect_timeout = connect_timeout if connect_timeout else 5 if not proxy else 10
@@ -277,8 +281,11 @@ class Manager:
     async def close(self):
         await self.broadcast(self.relays, 'close', self.taskgroup)
         await self.taskgroup.cancel_remaining()
+        if self._proxy:
+            await self._proxy.close()
+            self._proxy = None
 
-    async def add_event(self, event, timeout=5):
+    async def add_event(self, event):
         """ waits until one of the tasks succeeds, or raises timeout"""
         queue = asyncio.Queue()
         async def _add_event(relay):
@@ -290,7 +297,7 @@ class Manager:
             await queue.put(result)
         for relay in self.relays:
             await self.taskgroup.spawn(_add_event(relay))
-        result = await asyncio.wait_for(queue.get(), timeout=timeout)
+        result = await asyncio.wait_for(queue.get(), timeout=self._connect_timeout)
         return result
 
     async def subscribe(self, sub_id: str, *filters):

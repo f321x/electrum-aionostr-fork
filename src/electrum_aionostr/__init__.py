@@ -4,6 +4,7 @@ __author__ = """The Electrum Developers"""
 __version__ = '0.0.9'
 
 import time
+from typing import Optional, List, Any
 
 from .relay import Manager, Relay
 
@@ -64,7 +65,7 @@ async def get_anything(anything:str, relays=None, verbose=False, stream=False, o
         if not relays:
             raise NotImplementedError("No relays to use")
 
-        man = Manager(relays, verbose=verbose, origin=origin, private_key=private_key)
+        man = Manager(relays, origin=origin, private_key=private_key)
         if not stream:
             async with man:
                 return [event async for event in man.get_events(query, single_event=single_event, only_stored=True)]
@@ -110,11 +111,20 @@ async def _add_event(manager, event:dict=None, private_key='', kind=1, pubkey=''
         event_id = event.id
     else:
         event_id = event['id']
-    result = await manager.add_event(event, timeout=5)
+    result = await manager.add_event(event)
     return event_id
 
-async def add_event(relays, event:dict=None, private_key='', kind=1, pubkey='', content='', created_at=None, tags=None, direct_message='', verbose=False):
-    async with Manager(relays, verbose=verbose, private_key=private_key) as man:
+async def add_event(
+    relays,
+    event: Optional[dict] = None,
+    private_key: Optional[str] = '',
+    kind: Optional[int] = 1,
+    pubkey: Optional[str] = '',
+    content: Optional[str] = '',
+    created_at: Optional[int] = None,
+    tags: Optional[List[List[Any]]] = None,
+    direct_message: Optional[str] = '') -> str:
+    async with Manager(relays, private_key=private_key) as man:
         return await _add_event(
             man,
             event=event,
