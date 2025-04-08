@@ -257,9 +257,8 @@ class Manager:
     async def broadcast(self, relays, func, *args, **kwargs):
         """ returns when all tasks completed. timeout is enforced """
         results = []
-        timeout = self._connect_timeout + 2
         for relay in relays:
-            coro = asyncio.wait_for(getattr(relay, func)(*args, **kwargs), timeout=timeout)
+            coro = asyncio.wait_for(getattr(relay, func)(*args, **kwargs), timeout=self._connect_timeout)
             results.append(await self.taskgroup.spawn(coro))
 
         if not results:
