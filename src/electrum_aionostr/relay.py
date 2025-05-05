@@ -243,8 +243,8 @@ class Manager:
                 if result:
                     eid = result.id_bytes
                     if eid not in seen:
-                        await output.put(result)
                         seen.add(eid)
+                        await output.put(result)
                 else:
                     await output.put(None)
 
