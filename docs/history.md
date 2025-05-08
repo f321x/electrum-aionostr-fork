@@ -1,5 +1,13 @@
 # Release History / Changelog
 
+* **Release v0.0.10 (2025-05-08)**
+
+    - bump max supported `aiorpcx` to `<0.26`
+    - fix proxy: pass connector_owner to ClientSession to prevent connector being closed
+    - fix race condition causing subscription return duplicate events
+    - manager: use actual passed connect timeout as timeout for connections
+
+
 * **Release v0.0.9 (2025-03-20)**
 
     - Declare 'cryptography' dependency in optional extra `[crypto]`
