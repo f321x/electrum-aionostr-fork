@@ -49,7 +49,7 @@ NOSTR_KEY=`aionostr gen | head -1`
 
 Release checklist:
 - bump `__version__` in `__init__.py`
-- write changelog in `docs/history.rst`
+- write changelog in [`docs/history.md`](docs/history.md)
 - `$ git tag -s $VERSION -m "$VERSION"`
 - `$ git push "$REMOTE_ORIGIN" tag "$VERSION"`
 - build sdist (see [`contrib/sdist/`](contrib/sdist)):
